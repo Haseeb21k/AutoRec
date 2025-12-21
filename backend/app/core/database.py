@@ -11,6 +11,10 @@ load_dotenv()
 # Default to SQLite if DATABASE_URL not set
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./financial_system.db")
 
+# Fix for Railway/Heroku: SQLAlchemy 1.4+ requires 'postgresql://', but some providers give 'postgres://'
+if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # --- ENGINE ---
 connect_args = {}
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):

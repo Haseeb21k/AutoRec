@@ -8,10 +8,11 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
 sys.path.append(parent_dir)
 
-from sqlalchemy.orm import Session
-from backend.app.core.database import SessionLocal, engine, Base
-from backend.app.models import tables
-from backend.app.core.security import get_password_hash
+# --- IMPORTS ---
+# Run this from the directory containing 'app' (e.g., /app in Docker or backend/ locally)
+from app.core.database import SessionLocal, engine, Base
+from app.models import tables
+from app.core.security import get_password_hash
 
 def create_superuser():
     print("Checking database tables...")
@@ -21,8 +22,9 @@ def create_superuser():
     db = SessionLocal()
     
     print("\n--- Create Superuser ---")
-    email = input("Enter Superuser Email: ")
-    password = input("Enter Superuser Password: ")
+    # Try getting from Env vars first (Non-interactive), else input
+    email = os.getenv("SUPERUSER_EMAIL") or input("Enter Superuser Email: ")
+    password = os.getenv("SUPERUSER_PASSWORD") or input("Enter Superuser Password: ")
     
     # Check if user exists
     existing = db.query(tables.User).filter(tables.User.email == email).first()
