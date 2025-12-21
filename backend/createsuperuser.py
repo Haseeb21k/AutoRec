@@ -35,12 +35,17 @@ def create_superuser():
 
     # Create user
     try:
+        print(f"DEBUG: Password received. Length: {len(password)}")
+        print(f"DEBUG: First 2 chars: {password[:2]!r}")
+    
+        hash_value = get_password_hash(password)
+    
         user = tables.User(
-            email=email,
-            password_hash=get_password_hash(password),
-            role="superuser",
-            is_active=True
-        )
+        email=email,
+        password_hash=hash_value,
+        role="superuser",
+        is_active=True
+    )
         
         db.add(user)
         db.commit()

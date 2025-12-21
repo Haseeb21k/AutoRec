@@ -18,8 +18,10 @@ def verify_password(plain_password, hashed_password):
 
 def get_password_hash(password):
     # Fix: Truncate password to 72 bytes to prevent Bcrypt errors on creation
-    if len(password) > 72:
-        password = password[:72]
+    # We must operate on bytes, because bcrypt has a 72-byte limit, not 72-char.
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password = password_bytes[:72] # Passlib accepts bytes or str
     return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
