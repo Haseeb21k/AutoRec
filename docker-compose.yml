@@ -33,6 +33,8 @@ services:
     build: ./frontend
     container_name: reconciliation_frontend
     restart: always
+    environment:
+      - BACKEND_URL=http://backend:8000
     ports:
       - "80:80"
     depends_on:
