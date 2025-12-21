@@ -24,4 +24,5 @@ COPY . .
 RUN mkdir -p /app/data
 
 # Command is override-able by docker-compose
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command uses shell form to interpolate $PORT variable
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
