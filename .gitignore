@@ -71,3 +71,4 @@ backend/data/*.db
 pdfstatement.py
 excelgen.py
 frontend/Dockerfile
+backend/Dockerfile
