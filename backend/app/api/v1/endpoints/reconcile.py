@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.matching_engine import MatchingEngine
@@ -21,14 +21,24 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @router.post("/run")
 async def run_reconciliation(
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: tables.User = Depends(deps.get_current_superuser)
 ):
+    """
+    Triggers reconciliation in the background. 
+    Returns immediately so Nginx doesn't timeout.
+    """
     try:
         engine = MatchingEngine(db)
-        # Inject the global manager
-        results = await engine.run(websocket_manager=manager)
-        return {"status": "success", "results": results}
+        
+        # Define wrapper to run async engine path synchronously or handle new loop
+        # But MatchingEngine.run is async. BackgroundTasks expects a sync/async function.
+        # We can pass the coroutine directly if using FastAPI >= 0.68
+        
+        background_tasks.add_task(engine.run, websocket_manager=manager)
+        
+        return {"status": "started", "message": "Reconciliation started in background"}
     except Exception as e:
         import traceback
         traceback.print_exc()
