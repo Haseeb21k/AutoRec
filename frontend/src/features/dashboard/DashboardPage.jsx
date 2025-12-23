@@ -109,7 +109,10 @@ export default function DashboardPage() {
 
     // --- WEBSOCKET CONNECTION ---
     useEffect(() => {
-        const wsUrl = "ws://localhost:8000/api/v1/reconcile/ws";
+        // Use production URL or localhost based on environment
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const host = window.location.host; // includes port if any
+        const wsUrl = `${protocol}//${host}/api/v1/reconcile/ws`;
         // Check if websockets available (simple check)
         let ws;
         try {
