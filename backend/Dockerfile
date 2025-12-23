@@ -24,4 +24,4 @@ COPY . .
 RUN mkdir -p /app/data
 
 # Command uses shell form to interpolate $PORT variable
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+CMD uvicorn app.main:app --host :: --port ${PORT:-8000}
