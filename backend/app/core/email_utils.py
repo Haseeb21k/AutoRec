@@ -22,8 +22,9 @@ def send_invite_email(to_email: str, token: str):
         msg['Subject'] = "Invitation to AutoRec System"
 
         # 2. Create Link
-        # Note: This points to your Frontend URL
-        link = f"http://localhost:5173/setup-password?token={token}"
+        # Get frontend URL from environment (Railway production or localhost for dev)
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+        link = f"{frontend_url}/setup-password?token={token}"
         
         # 3. Email Body (HTML)
         html = f"""
