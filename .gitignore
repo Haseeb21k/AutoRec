@@ -70,3 +70,4 @@ backend/data/*.db
 !README.md
 pdfstatement.py
 excelgen.py
+frontend/nginx.conf
