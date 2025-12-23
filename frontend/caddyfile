@@ -1,13 +1,16 @@
 :{$PORT} {
     root * /usr/share/caddy
     file_server
-    try_files {path} /index.html
+    
+    # Proxy all API requests
+    # Using handle_path ensures /api/v1/auth/token is sent 
+    # to the backend correctly
+    handle /api/v1/* {
+        reverse_proxy {$BACKEND_URL}
+    }
 
-    # Proxy all API and WebSocket traffic
-    reverse_proxy /api/v1/* {$BACKEND_URL} {
-        # This ensures the connection doesn't drop during long AI tasks
-        transport http {
-            read_timeout 300s
-        }
+    # Handle SPA routing for everything else
+    handle {
+        try_files {path} /index.html
     }
 }
