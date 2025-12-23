@@ -151,24 +151,26 @@ export default function DashboardPage() {
 
     const handleRunReconciliation = async () => {
         setRunning(true);
-        // Clear recent matches visual queue before run? Or keep them?
-        // Let's keep them, as new ones will just pop in.
         try {
             const res = await apiClient.post('/reconcile/run');
-            const results = res.data.results;
 
-            await loadData();
+            // Backend now returns {"status": "started", "message": "..."}
+            // The actual results will come via WebSocket in real-time
+            if (res.data.status === "started") {
+                console.log("Reconciliation started:", res.data.message);
+                // Optionally show a toast or notification that it started
+                // Results will appear in real-time via WebSocket
 
-            if (results.bank_items_scanned === 0) {
-                alert("No transactions found. Please upload files first.");
-            } else {
-                setRunResults(results);
-                setShowSuccessModal(true);
+                // Reload stats after reconciliation completes
+                // We'll reload after a delay or when WebSocket closes
+                setTimeout(async () => {
+                    await loadData();
+                    setRunning(false);
+                }, 2000); // Give it 2 seconds for initial matches to appear
             }
         } catch (err) {
             console.error(err);
-            alert("Failed to run reconciliation. Check console for details.");
-        } finally {
+            alert("Failed to start reconciliation. Check console for details.");
             setRunning(false);
         }
     };
