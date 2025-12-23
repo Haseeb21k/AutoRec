@@ -24,5 +24,6 @@ COPY . .
 RUN mkdir -p /app/data
 
 # Command uses shell form to interpolate $PORT variable
-# Listen on 0.0.0.0 (IPv4) - Standard for most Docker environments
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Listen on :: (all interfaces, IPv6 + IPv4 dual-stack) for Railway's internal network
+# Railway's private network uses IPv6, so this is required
+CMD uvicorn app.main:app --host :: --port ${PORT:-8000}
