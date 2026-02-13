@@ -166,7 +166,7 @@ export default function DashboardPage() {
                 setTimeout(async () => {
                     await loadData();
                     setRunning(false);
-                }, 10000); // Give it 10 seconds - adjust based on your data size
+                }, 2000); // Give it 2 seconds for initial matches to appear
             }
         } catch (err) {
             console.error(err);

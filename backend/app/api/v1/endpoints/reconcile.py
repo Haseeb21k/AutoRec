@@ -22,31 +22,22 @@ async def websocket_endpoint(websocket: WebSocket):
 @router.post("/run")
 async def run_reconciliation(
     background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
     current_user: tables.User = Depends(deps.get_current_superuser)
 ):
     """
     Triggers reconciliation in the background. 
-    Returns immediately so timeouts don't occur.
-    IMPORTANT: Creates a NEW db session for the background task.
+    Returns immediately so Nginx doesn't timeout.
     """
-    from app.core.database import SessionLocal
-    
-    async def run_with_new_session():
-        """Wrapper that creates a fresh DB session for background execution"""
-        db = SessionLocal()
-        try:
-            engine = MatchingEngine(db)
-            results = await engine.run(websocket_manager=manager)
-            print(f"🎉 Reconciliation complete! Results: {results}")
-        except Exception as e:
-            print(f"❌ Background reconciliation error: {e}")
-            import traceback
-            traceback.print_exc()
-        finally:
-            db.close()
-    
     try:
-        background_tasks.add_task(run_with_new_session)
+        engine = MatchingEngine(db)
+        
+        # Define wrapper to run async engine path synchronously or handle new loop
+        # But MatchingEngine.run is async. BackgroundTasks expects a sync/async function.
+        # We can pass the coroutine directly if using FastAPI >= 0.68
+        
+        background_tasks.add_task(engine.run, websocket_manager=manager)
+        
         return {"status": "started", "message": "Reconciliation started in background"}
     except Exception as e:
         import traceback

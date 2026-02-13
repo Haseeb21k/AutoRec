@@ -42,8 +42,8 @@ class Transaction(Base):
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     
-    date = Column(Date, nullable=False, index=True)
-    amount = Column(Numeric(14, 2), nullable=False, index=True)
+    date = Column(Date, nullable=False)
+    amount = Column(Numeric(14, 2), nullable=False)
     description = Column(String, nullable=True)
     external_ref_id = Column(String, nullable=True, index=True)
     raw_source = Column(String, nullable=True) 
@@ -59,8 +59,8 @@ class InternalLedger(Base):
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     
-    date = Column(Date, nullable=False, index=True)
-    amount = Column(Numeric(14, 2), nullable=False, index=True)
+    date = Column(Date, nullable=False)
+    amount = Column(Numeric(14, 2), nullable=False)
     description = Column(String, nullable=True)
     gl_code = Column(String, nullable=True)
     
