@@ -53,11 +53,11 @@ class MatchingEngine:
                     "amount": float(match_obj.transaction.amount),
                     "date": str(match_obj.transaction.date),
                     "bank_desc": match_obj.transaction.description,
-                    "ledger_desc": match_obj.ledger.description,
+                    "ledger_desc": match_obj.ledger.description if match_obj.ledger else "-",
                     "confidence": float(match_obj.confidence_score)
                 })
-                # Simulate work for visual effect
-                await asyncio.sleep(0.05)
+                # Small delay: fast but not instant, so the UI feels alive
+                await asyncio.sleep(0.005)
 
         # --- PASS 1: EXACT MATCH (Amount + Date) ---
         for bank_tx in unmatched_bank:
@@ -110,18 +110,14 @@ class MatchingEngine:
             # Using helper but passing None for ledger_tx
             # We need to update helper to handle None ledger
             db_match = self._create_match(tx, None, "mismatch", 0.0)
-            
-            if websocket_manager:
-                await websocket_manager.broadcast({
-                    "id": db_match.id,
-                    "match_type": "mismatch",
-                    "amount": float(tx.amount),
-                    "date": str(tx.date),
-                    "bank_desc": tx.description,
-                    "ledger_desc": "-",
-                    "confidence": 0.0
-                })
-                await asyncio.sleep(0.01)
+            await broadcast_match(db_match)
+
+        # Send completion event so the frontend knows we're done
+        if websocket_manager:
+            await websocket_manager.broadcast({
+                "type": "complete",
+                "results": results
+            })
 
         return results
 

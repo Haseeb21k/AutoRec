@@ -31,13 +31,7 @@ async def run_reconciliation(
     """
     try:
         engine = MatchingEngine(db)
-        
-        # Define wrapper to run async engine path synchronously or handle new loop
-        # But MatchingEngine.run is async. BackgroundTasks expects a sync/async function.
-        # We can pass the coroutine directly if using FastAPI >= 0.68
-        
         background_tasks.add_task(engine.run, websocket_manager=manager)
-        
         return {"status": "started", "message": "Reconciliation started in background"}
     except Exception as e:
         import traceback

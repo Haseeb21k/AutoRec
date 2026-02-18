@@ -120,12 +120,31 @@ export default function DashboardPage() {
             ws.onopen = () => console.log("Connected to Real-Time Reconciliation Feed");
             ws.onmessage = (event) => {
                 try {
-                    const newMatch = JSON.parse(event.data);
-                    // Prepend new match.
-                    // User wants ALL matches, so we don't slice off old ones anymore.
-                    setRecentMatches(prev => [newMatch, ...prev]);
+                    const data = JSON.parse(event.data);
 
-                    if (newMatch.match_type !== 'mismatch') {
+                    // Handle completion event from backend
+                    if (data.type === 'complete') {
+                        // Clear fallback polling if active
+                        if (window._reconcilePollInterval) {
+                            clearInterval(window._reconcilePollInterval);
+                            window._reconcilePollInterval = null;
+                        }
+                        setRunning(false);
+                        loadData(); // Refresh final stats
+                        return;
+                    }
+
+                    // Handle error event from backend
+                    if (data.type === 'error') {
+                        setRunning(false);
+                        console.error('Reconciliation error:', data.message);
+                        return;
+                    }
+
+                    // Normal match object
+                    setRecentMatches(prev => [data, ...prev]);
+
+                    if (data.match_type !== 'mismatch') {
                         setStats(prev => ({
                             ...prev,
                             total_matches: prev.total_matches + 1,
@@ -145,7 +164,7 @@ export default function DashboardPage() {
         return () => {
             if (ws) ws.close();
         };
-    }, []); // Re-connect if limit changes? No, logic is inside setter.
+    }, []); // WebSocket connection — no dependencies needed
     // Actually, dependency on isExpanded in setState callback is fine without re-running effect.
     // BUT we need to be careful not to reset connection constantly. removed isExpanded dependency.
 
@@ -153,20 +172,36 @@ export default function DashboardPage() {
         setRunning(true);
         try {
             const res = await apiClient.post('/reconcile/run');
-
-            // Backend now returns {"status": "started", "message": "..."}
-            // The actual results will come via WebSocket in real-time
             if (res.data.status === "started") {
                 console.log("Reconciliation started:", res.data.message);
-                // Optionally show a toast or notification that it started
-                // Results will appear in real-time via WebSocket
+                // Primary: WS 'complete' event sets running=false
+                // Fallback: poll stats every 3s and stop after no change
+                let lastMatchCount = stats.total_matches;
+                let stableCount = 0;
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const [statsRes, activityRes] = await Promise.all([
+                            apiClient.get('/reconcile/stats'),
+                            apiClient.get('/reconcile/activity?limit=1000')
+                        ]);
+                        setStats(statsRes.data);
+                        setRecentMatches(activityRes.data);
 
-                // Reload stats after reconciliation completes
-                // We'll reload after a delay or when WebSocket closes
-                setTimeout(async () => {
-                    await loadData();
-                    setRunning(false);
-                }, 2000); // Give it 2 seconds for initial matches to appear
+                        if (statsRes.data.total_matches === lastMatchCount) {
+                            stableCount++;
+                        } else {
+                            stableCount = 0;
+                            lastMatchCount = statsRes.data.total_matches;
+                        }
+                        // If no change for 2 polls (6s), assume done
+                        if (stableCount >= 2) {
+                            clearInterval(pollInterval);
+                            setRunning(false);
+                        }
+                    } catch (e) { /* ignore poll errors */ }
+                }, 3000);
+                // Store interval ID so WS complete handler can clear it
+                window._reconcilePollInterval = pollInterval;
             }
         } catch (err) {
             console.error(err);

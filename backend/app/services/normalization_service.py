@@ -21,8 +21,9 @@ class NormalizationService:
         
         try:
             if filename.endswith('.csv') or filename.endswith('.xlsx'):
+                # If no explicit mapping provided, pass a default guess.
+                # CSVStrategy will auto-detect if these headers don't exist.
                 if not column_mapping:
-                    # Default mapping if none provided
                     column_mapping = {'date': 'Date', 'amount': 'Amount', 'description': 'Description'}
                 strategy = CSVStrategy()
                 return strategy.parse(content, column_mapping=column_mapping)
