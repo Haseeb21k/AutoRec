@@ -47,7 +47,9 @@ export const AuthProvider = ({ children }) => {
         params.append('password', password);
         params.append('remember_me', rememberMe);
 
-        const res = await apiClient.post('/auth/token', params);
+        const res = await apiClient.post('/auth/token', params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
 
         const { access_token } = res.data;
 

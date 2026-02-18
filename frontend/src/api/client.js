@@ -5,7 +5,7 @@ const apiClient = axios.create({
   // We use /api because vite.config.js proxies this to http://127.0.0.1:8000
   baseURL: '/api/v1',
   headers: {
-    'Content-Type': 'application/json',
+    // Default headers if any
   },
 });
 
