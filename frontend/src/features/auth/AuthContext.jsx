@@ -42,14 +42,12 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password, rememberMe = false) => {
-        const formData = new FormData();
-        formData.append('username', email);
-        formData.append('password', password);
-        formData.append('remember_me', rememberMe);
+        const params = new URLSearchParams();
+        params.append('username', email);
+        params.append('password', password);
+        params.append('remember_me', rememberMe);
 
-        const res = await apiClient.post('/auth/token', formData, {
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
+        const res = await apiClient.post('/auth/token', params);
 
         const { access_token } = res.data;
 
