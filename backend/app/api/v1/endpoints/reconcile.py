@@ -42,8 +42,11 @@ async def run_reconciliation(
 
 @router.get("/stats")
 def get_stats(db: Session = Depends(get_db)):
-    total_bank = db.query(tables.Transaction).count()
-    total_matches = db.query(tables.ReconciliationMatch).count()
+    """
+    Returns stats for ACTIVE (unreconciled) data only.
+    """
+    total_bank = db.query(tables.Transaction).filter(tables.Transaction.report_id == None).count()
+    total_matches = db.query(tables.ReconciliationMatch).filter(tables.ReconciliationMatch.report_id == None).count()
     
     rate = 0
     if total_bank > 0:
@@ -197,10 +200,11 @@ def delete_report(
 @router.get("/activity")
 def get_recent_activity(limit: int = 10, db: Session = Depends(get_db)):
     """
-    Returns the recent matches with details.
+    Returns the recent matches that are NOT part of a saved report.
     """
     # If limit is -1 or very large, we return all
     query = db.query(tables.ReconciliationMatch)\
+        .filter(tables.ReconciliationMatch.report_id == None)\
         .order_by(tables.ReconciliationMatch.matched_at.desc())
         
     if limit > 0:

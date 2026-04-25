@@ -8,7 +8,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 const FeedTable = ({ matches, limit }) => (
     <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+            <thead className="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-slate-800/50 border-b dark:border-slate-700">
                 <tr>
                     <th className="px-4 py-3">Date</th>
                     <th className="px-4 py-3">Bank Statement</th>
@@ -20,7 +20,7 @@ const FeedTable = ({ matches, limit }) => (
             <tbody>
                 {matches.length === 0 ? (
                     <tr>
-                        <td colSpan="5" className="px-4 py-8 text-center text-gray-500 italic">
+                        <td colSpan="5" className="px-4 py-12 text-center text-slate-500 dark:text-slate-400 italic">
                             No matches found matching filters.
                         </td>
                     </tr>
@@ -30,31 +30,31 @@ const FeedTable = ({ matches, limit }) => (
                         let badgeText = '';
 
                         if (match.match_type === 'exact') {
-                            badgeColor = 'bg-green-100 text-green-800';
+                            badgeColor = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
                             badgeText = 'Exact';
                         } else if (match.match_type === 'fuzzy_date' || match.match_type === 'fuzzy_desc') {
-                            badgeColor = 'bg-yellow-100 text-yellow-800';
+                            badgeColor = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
                             badgeText = 'Fuzzy';
                         } else if (match.match_type === 'mismatch') {
-                            badgeColor = 'bg-red-100 text-red-800';
+                            badgeColor = 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
                             badgeText = 'No Match';
                         }
 
                         return (
-                            <tr key={match.id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
-                                <td className="px-4 py-3 whitespace-nowrap text-gray-500">{match.date}</td>
-                                <td className="px-4 py-3 font-medium text-gray-800 truncate max-w-[150px]" title={match.bank_desc}>
+                            <tr key={match.id} className="border-b dark:border-slate-800 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                <td className="px-4 py-3 whitespace-nowrap text-slate-500 dark:text-slate-400">{match.date}</td>
+                                <td className="px-4 py-3 font-medium text-slate-800 dark:text-white truncate max-w-[150px]" title={match.bank_desc}>
                                     {match.bank_desc}
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badgeColor}`}>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${badgeColor}`}>
                                         {badgeText}
                                     </span>
                                 </td>
-                                <td className="px-4 py-3 text-gray-600 truncate max-w-[150px]" title={match.ledger_desc}>
-                                    {match.ledger_desc === '-' ? <span className="text-gray-400 italic">N/A</span> : match.ledger_desc}
+                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 truncate max-w-[150px]" title={match.ledger_desc}>
+                                    {match.ledger_desc === '-' ? <span className="text-slate-400 italic">N/A</span> : match.ledger_desc}
                                 </td>
-                                <td className="px-4 py-3 text-right font-bold text-gray-900">
+                                <td className="px-4 py-3 text-right font-bold text-slate-900 dark:text-white">
                                     ${Math.abs(match.amount).toLocaleString()}
                                 </td>
                             </tr>
@@ -279,22 +279,22 @@ export default function DashboardPage() {
             label: 'Reconciliation Rate',
             value: `${stats.reconciliation_rate}%`,
             icon: Activity,
-            color: 'text-blue-600',
-            bg: 'bg-blue-100'
+            color: 'text-primary-600',
+            bg: 'bg-primary-100'
         },
         {
             label: 'Unmatched Items',
             value: unmatched.toLocaleString(),
             icon: AlertTriangle,
-            color: 'text-orange-600',
-            bg: 'bg-orange-100'
+            color: 'text-primary-700',
+            bg: 'bg-primary-200'
         },
         {
             label: 'Fully Reconciled',
             value: stats.total_matches.toLocaleString(),
             icon: CheckCircle2,
-            color: 'text-green-600',
-            bg: 'bg-green-100'
+            color: 'text-primary-600',
+            bg: 'bg-primary-50'
         },
         {
             label: 'Total Volume',
@@ -306,61 +306,61 @@ export default function DashboardPage() {
     ];
 
     if (loading) {
-        return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-indigo-600" /></div>;
+        return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-primary-600" /></div>;
     }
 
     return (
         <div className="space-y-8 relative">
             {/* Modal Overlay for Expanded View */}
             {isExpanded && (
-                <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in fade-in zoom-in duration-200">
-                    <div className="px-8 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shadow-sm">
+                <div className="fixed inset-0 z-50 bg-white dark:bg-slate-950 flex flex-col animate-in fade-in zoom-in duration-200">
+                    <div className="px-8 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 shadow-sm">
                         <div className="flex items-center gap-4">
-                            <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center">
                                 <Zap className="w-5 h-5 text-yellow-500 mr-2" />
                                 Live Reconciliation Feed
                             </h2>
-                            <div className="flex items-center bg-white border border-gray-300 rounded-lg p-1">
-                                <label className="flex items-center px-3 py-1 cursor-pointer hover:bg-gray-50 rounded select-none">
+                            <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-1">
+                                <label className="flex items-center px-3 py-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 rounded select-none text-slate-700 dark:text-slate-300">
                                     <input
                                         type="checkbox"
                                         checked={filters.exact}
                                         onChange={e => setFilters(prev => ({ ...prev, exact: e.target.checked }))}
-                                        className="rounded text-indigo-600 focus:ring-indigo-500 mr-2"
+                                        className="rounded text-primary-600 focus:ring-primary-500 mr-2"
                                     />
-                                    <span className="text-sm text-gray-700">Exact Matches</span>
+                                    <span className="text-sm">Exact Matches</span>
                                 </label>
-                                <div className="w-px h-4 bg-gray-300 mx-1"></div>
-                                <label className="flex items-center px-3 py-1 cursor-pointer hover:bg-gray-50 rounded select-none">
+                                <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
+                                <label className="flex items-center px-3 py-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 rounded select-none text-slate-700 dark:text-slate-300">
                                     <input
                                         type="checkbox"
                                         checked={filters.fuzzy}
                                         onChange={e => setFilters(prev => ({ ...prev, fuzzy: e.target.checked }))}
-                                        className="rounded text-indigo-600 focus:ring-indigo-500 mr-2"
+                                        className="rounded text-primary-600 focus:ring-primary-500 mr-2"
                                     />
-                                    <span className="text-sm text-gray-700">Fuzzy Matches</span>
+                                    <span className="text-sm">Fuzzy Matches</span>
                                 </label>
-                                <div className="w-px h-4 bg-gray-300 mx-1"></div>
-                                <label className="flex items-center px-3 py-1 cursor-pointer hover:bg-gray-50 rounded select-none">
+                                <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
+                                <label className="flex items-center px-3 py-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 rounded select-none text-slate-700 dark:text-slate-300">
                                     <input
                                         type="checkbox"
                                         checked={filters.mismatch}
                                         onChange={e => setFilters(prev => ({ ...prev, mismatch: e.target.checked }))}
                                         className="rounded text-red-600 focus:ring-red-500 mr-2"
                                     />
-                                    <span className="text-sm text-gray-700">Mismatches</span>
+                                    <span className="text-sm">Mismatches</span>
                                 </label>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsExpanded(false)}
-                            className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                            className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors"
                         >
-                            <X className="w-6 h-6 text-gray-500" />
+                            <X className="w-6 h-6 text-slate-500 dark:text-slate-400" />
                         </button>
                     </div>
-                    <div className="flex-1 overflow-auto p-8 bg-gray-50/50">
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div className="flex-1 overflow-auto p-8 bg-slate-50/50 dark:bg-slate-900/20">
+                        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
                             <FeedTable matches={filteredMatches} limit={filteredMatches.length} />
                         </div>
                     </div>
@@ -370,28 +370,28 @@ export default function DashboardPage() {
             {/* Reconciliation Success Modal */}
             {showSuccessModal && runResults && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-800">
                         <div className="text-center mb-6">
-                            <div className="mx-auto bg-green-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-                                <CheckCircle2 className="w-8 h-8 text-green-600" />
+                            <div className="mx-auto bg-green-100 dark:bg-green-900/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                                <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900">Reconciliation Complete</h3>
-                            <p className="text-gray-500 text-sm mt-1">
+                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Reconciliation Complete</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                                 Engine has processed all pending transactions.
                             </p>
                         </div>
 
-                        <div className="bg-gray-50 rounded-lg p-4 space-y-3 mb-6 border border-gray-100">
+                        <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 space-y-3 mb-6 border border-slate-100 dark:border-slate-700">
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-600">Items Scanned</span>
-                                <span className="font-bold text-gray-900">{runResults.bank_items_scanned}</span>
+                                <span className="text-slate-600 dark:text-slate-400">Items Scanned</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{runResults.bank_items_scanned}</span>
                             </div>
-                            <div className="h-px bg-gray-200"></div>
-                            <div className="flex justify-between items-center text-sm text-green-700">
+                            <div className="h-px bg-slate-200 dark:bg-slate-700"></div>
+                            <div className="flex justify-between items-center text-sm text-green-700 dark:text-green-400">
                                 <span className="flex items-center"><Zap className="w-3 h-3 mr-1" /> Exact Matches</span>
                                 <span className="font-bold">{runResults.exact_matches}</span>
                             </div>
-                            <div className="flex justify-between items-center text-sm text-yellow-700">
+                            <div className="flex justify-between items-center text-sm text-yellow-700 dark:text-yellow-400">
                                 <span className="flex items-center"><Activity className="w-3 h-3 mr-1" /> Fuzzy Matches</span>
                                 <span className="font-bold">{runResults.fuzzy_matches}</span>
                             </div>
@@ -399,7 +399,7 @@ export default function DashboardPage() {
 
                         <button
                             onClick={() => setShowSuccessModal(false)}
-                            className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-md"
+                            className="w-full py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-md"
                         >
                             View Results
                         </button>
@@ -411,41 +411,41 @@ export default function DashboardPage() {
             {/* Save Report Modal */}
             {showSaveModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4 duration-300 border border-slate-200 dark:border-slate-800">
                         <div className="text-center mb-6">
-                            <div className="mx-auto bg-indigo-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 text-indigo-600">
+                            <div className="mx-auto bg-primary-100 dark:bg-primary-900/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 text-primary-600 dark:text-primary-400">
                                 <Save className="w-8 h-8" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900">Finalize Reconciliation</h3>
-                            <p className="text-gray-500 text-sm mt-1">
+                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Finalize Reconciliation</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                                 Give this reconciliation run a name to save it to your history.
                             </p>
                         </div>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Report Name</label>
+                                <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1 ml-1">Report Name</label>
                                 <input 
                                     autoFocus
                                     type="text" 
                                     value={reportName}
                                     onChange={e => setReportName(e.target.value)}
                                     placeholder="e.g., Monthly Close - April 2026"
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-medium"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                                 />
                             </div>
                             
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowSaveModal(false)}
-                                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                    className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleSaveReport}
                                     disabled={savingReport || !reportName.trim()}
-                                    className="flex-[2] py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg disabled:opacity-50"
+                                    className="flex-[2] py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-colors shadow-lg disabled:opacity-50"
                                 >
                                     {savingReport ? 'Saving...' : 'Confirm & Save'}
                                 </button>
@@ -458,21 +458,21 @@ export default function DashboardPage() {
             {/* Clear Data Confirmation Modal */}
             {showClearModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in scale-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in scale-in duration-200 border border-slate-200 dark:border-slate-800">
                         <div className="text-center mb-6">
-                            <div className="mx-auto bg-red-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 text-red-600">
+                            <div className="mx-auto bg-red-100 dark:bg-red-900/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 text-red-600 dark:text-red-400">
                                 <Trash2 className="w-8 h-8" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900">Clear Active Data?</h3>
-                            <p className="text-gray-500 text-sm mt-1">
+                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Clear Active Data?</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                                 This will remove all currently unmatched items and pending results.
-                                <span className="block mt-2 font-bold text-red-600">Saved reports will NOT be affected.</span>
+                                <span className="block mt-2 font-bold text-red-600 dark:text-red-400">Saved reports will NOT be affected.</span>
                             </p>
                         </div>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowClearModal(false)}
-                                className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -490,8 +490,8 @@ export default function DashboardPage() {
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Executive Reconciliation Overview</h1>
-                    <p className="text-gray-500 text-sm mt-1">Live financial health status</p>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Executive Reconciliation Overview</h1>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Live financial health status</p>
                 </div>
 
                 {user?.role === 'superuser' && (
@@ -509,7 +509,7 @@ export default function DashboardPage() {
                                 
                                 <button
                                     onClick={() => setShowSaveModal(true)}
-                                    className="flex items-center px-6 py-3 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-bold shadow-sm hover:bg-indigo-50 transition-all"
+                                    className="flex items-center px-6 py-3 bg-white border-2 border-primary-600 text-primary-600 rounded-xl font-bold shadow-sm hover:bg-primary-50 transition-all"
                                 >
                                     <Database className="w-5 h-5 mr-2" />
                                     Save as Report
@@ -520,7 +520,7 @@ export default function DashboardPage() {
                         <button
                             onClick={handleRunReconciliation}
                             disabled={running}
-                            className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all disabled:bg-indigo-400 disabled:shadow-none"
+                            className="flex items-center px-6 py-3 bg-primary-600 text-white rounded-xl font-medium shadow-md hover:bg-primary-700 hover:shadow-lg transition-all disabled:bg-primary-400 disabled:shadow-none"
                         >
                             {running ? (
                                 <>
@@ -541,13 +541,13 @@ export default function DashboardPage() {
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {statCards.map((stat, index) => (
-                    <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center hover:shadow-md transition-shadow">
-                        <div className={`p-3 rounded-lg ${stat.bg} mr-4`}>
+                    <div key={index} className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center hover:shadow-md transition-shadow">
+                        <div className={`p-3 rounded-lg ${stat.bg} dark:bg-opacity-10 mr-4`}>
                             <stat.icon className={`w-6 h-6 ${stat.color}`} />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                            <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
                         </div>
                     </div>
                 ))}
@@ -556,19 +556,19 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Live Reconciliation Feed */}
-                <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full">
-                    <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                        <h3 className="font-bold text-gray-800 flex items-center">
+                <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col h-full">
+                    <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                        <h3 className="font-bold text-slate-800 dark:text-white flex items-center">
                             <Zap className="w-4 h-4 text-yellow-500 mr-2" />
                             Live Reconciliation Feed
                         </h3>
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-500 bg-white px-2 py-1 rounded border border-gray-200 shadow-sm">
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
                                 {isExpanded ? 'Full History' : 'Recent Matches'}
                             </span>
                             <button
                                 onClick={() => setIsExpanded(true)}
-                                className="p-1 hover:bg-gray-200 rounded transition-colors text-gray-500"
+                                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-500"
                                 title="Expand View"
                             >
                                 <Maximize2 className="w-4 h-4" />
@@ -580,10 +580,10 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Right Column: Alerts / Actions */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h3 className="font-bold text-gray-800 mb-4">System Health</h3>
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <h3 className="font-bold text-slate-800 dark:text-white mb-4">System Health</h3>
                     <div className="space-y-4">
-                        <div className="flex items-center p-3 bg-green-50 text-green-700 rounded-lg text-sm">
+                        <div className="flex items-center p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg text-sm">
                             <CheckCircle2 className="w-5 h-5 mr-3" />
                             <div>
                                 <span className="font-bold">System Operational</span>
@@ -592,7 +592,7 @@ export default function DashboardPage() {
                         </div>
 
                         {unmatched > 0 && (
-                            <div className="flex items-center p-3 bg-orange-50 text-orange-700 rounded-lg text-sm">
+                            <div className="flex items-center p-3 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 rounded-lg text-sm">
                                 <AlertTriangle className="w-5 h-5 mr-3" />
                                 <div>
                                     <span className="font-bold">{unmatched} Unmatched Items</span>
@@ -601,9 +601,9 @@ export default function DashboardPage() {
                             </div>
                         )}
 
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                            <p className="text-xs text-gray-400 uppercase font-bold mb-2">Last Run</p>
-                            <p className="text-sm text-gray-600">Just now</p>
+                        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <p className="text-xs text-slate-400 uppercase font-bold mb-2">Last Run</p>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">Just now</p>
                         </div>
                     </div>
                 </div>

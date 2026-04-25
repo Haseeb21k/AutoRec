@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    @apply bg-gray-50 text-gray-900;
+@layer base {
+    body {
+        @apply bg-primary-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-50;
+    }
 }

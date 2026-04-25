@@ -19,7 +19,7 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-sans text-gray-900">
+    <div className="flex min-h-screen bg-primary-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50 transition-colors duration-300">
       <Sidebar />
       <main className="flex-1 ml-64 p-8 overflow-y-auto">
         {children}

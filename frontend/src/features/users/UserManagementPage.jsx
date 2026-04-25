@@ -85,19 +85,19 @@ export default function UserManagementPage() {
             {/* Custom Invite Success Modal */}
             {inviteSuccessModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-800">
                         <div className="text-center">
-                            <div className="mx-auto bg-green-100 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-                                <Mail className="w-6 h-6 text-green-600" />
+                            <div className="mx-auto bg-green-100 dark:bg-green-900/30 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+                                <Mail className="w-6 h-6 text-green-600 dark:text-green-400" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900">Invite Sent!</h3>
-                            <p className="text-gray-500 text-sm mt-2">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Invite Sent!</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
                                 An invitation has been sent to <br />
-                                <span className="font-medium text-gray-900">{invitedEmailState}</span>
+                                <span className="font-medium text-slate-900 dark:text-white">{invitedEmailState}</span>
                             </p>
                             <button
                                 onClick={() => setInviteSuccessModalOpen(false)}
-                                className="mt-6 w-full py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+                                className="mt-6 w-full py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors shadow-sm dark:shadow-none"
                             >
                                 Done
                             </button>
@@ -109,17 +109,17 @@ export default function UserManagementPage() {
             {/* Custom Delete Warning Modal */}
             {deleteModalOpen && userToDelete && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-800">
                         <div className="flex items-start mb-4">
-                            <div className="bg-red-100 p-3 rounded-full mr-4">
-                                <Trash2 className="w-6 h-6 text-red-600" />
+                            <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-full mr-4">
+                                <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900">Delete User?</h3>
-                                <p className="text-gray-500 text-sm mt-1">
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Delete User?</h3>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                                     Are you sure you want to remove <strong>{userToDelete.email}</strong>?
                                 </p>
-                                <p className="text-red-500 text-xs mt-2 font-medium bg-red-50 p-2 rounded">
+                                <p className="text-red-500 dark:text-red-400 text-xs mt-2 font-medium bg-red-50 dark:bg-red-900/20 p-2 rounded">
                                     Warning: This action cannot be undone.
                                 </p>
                             </div>
@@ -127,7 +127,7 @@ export default function UserManagementPage() {
                         <div className="flex justify-end gap-3 mt-6">
                             <button
                                 onClick={() => setDeleteModalOpen(false)}
-                                className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                                className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-colors"
                             >
                                 Cancel
                             </button>
@@ -146,27 +146,27 @@ export default function UserManagementPage() {
 
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-                    <p className="text-gray-500 text-sm">Control access and roles</p>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">User Management</h1>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Control access and roles</p>
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-sm font-bold text-gray-500 uppercase mb-4">Invite New User</h3>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+                <h3 className="text-sm font-bold text-slate-500 dark:text-white uppercase mb-4">Invite New User</h3>
                 <form onSubmit={handleInvite} className="flex gap-4 items-center">
                     <div className="flex-1 relative">
-                        <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                        <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                         <input
                             type="email"
                             required
                             placeholder="colleague@company.com"
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
                             value={inviteEmail}
                             onChange={e => setInviteEmail(e.target.value)}
                         />
                     </div>
                     <select
-                        className="border border-gray-300 rounded-lg px-4 py-2 bg-white"
+                        className="border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500"
                         value={inviteRole}
                         onChange={e => setInviteRole(e.target.value)}
                     >
@@ -176,37 +176,40 @@ export default function UserManagementPage() {
                     <button
                         type="submit"
                         disabled={inviting}
-                        className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 flex items-center disabled:opacity-50"
+                        className="bg-primary-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-700 flex items-center disabled:opacity-50 shadow-md"
                     >
                         {inviting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4 mr-2" /> Send Invite</>}
                     </button>
                 </form>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">User</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Role</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Status</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
                         {users.map((u) => (
                             <tr key={u.id}>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
-                                        <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-xs">
+                                        <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xs">
                                             {u.email.charAt(0).toUpperCase()}
                                         </div>
-                                        <div className="ml-4 text-sm font-medium text-gray-900">{u.email}</div>
+                                        <div className="ml-4 text-sm font-medium text-slate-900 dark:text-white">{u.email}</div>
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${u.role === 'superuser' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                                        }`}>
+                                    <span className={`px-2.5 py-0.5 inline-flex text-[10px] uppercase tracking-wider leading-5 font-bold rounded-full ${
+                                        u.role === 'superuser' 
+                                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                    }`}>
                                         {u.role}
                                     </span>
                                 </td>
@@ -219,7 +222,7 @@ export default function UserManagementPage() {
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <button
                                         onClick={() => toggleStatus(u.id)}
-                                        className="text-indigo-600 hover:text-indigo-900 text-xs font-bold mr-4"
+                                        className="text-primary-600 hover:text-primary-900 text-xs font-bold mr-4"
                                     >
                                         {u.is_active ? 'Deactivate' : 'Activate'}
                                     </button>

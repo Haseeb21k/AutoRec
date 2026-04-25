@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Lock, CheckCircle, AlertCircle, Sun, Moon, ArrowRight } from 'lucide-react';
 import apiClient from '@/api/client';
 
 export default function SetPasswordPage() {
@@ -12,6 +12,17 @@ export default function SetPasswordPage() {
     const [confirm, setConfirm] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [darkMode, setDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+
+    useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }, [darkMode]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -35,48 +46,59 @@ export default function SetPasswordPage() {
     if (!token) return <div className="p-10 text-center text-red-500">Invalid Link</div>;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-300">
+            {/* Theme Toggle */}
+            <div className="fixed top-6 right-6">
+                <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                >
+                    {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
+            </div>
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <h2 className="text-center text-3xl font-extrabold text-gray-900">
+                <h2 className="text-center text-3xl font-extrabold text-slate-900 dark:text-white">
                     Set Your Password
                 </h2>
-                <p className="mt-2 text-center text-sm text-gray-600">
+                <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
                     Welcome to AutoRec. Please secure your account.
                 </p>
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                <div className="bg-white dark:bg-slate-900 py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-slate-200 dark:border-slate-800">
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         {error && (
-                            <div className="bg-red-50 text-red-600 px-4 py-2 rounded text-sm flex items-center">
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm flex items-center font-medium">
                                 <AlertCircle className="w-4 h-4 mr-2" /> {error}
                             </div>
                         )}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">New Password</label>
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">New Password</label>
                             <input
                                 type="password"
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="••••••••"
+                                className="mt-1 block w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary-500 text-slate-900 dark:text-white transition-all"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">Confirm Password</label>
                             <input
                                 type="password"
                                 required
                                 value={confirm}
                                 onChange={(e) => setConfirm(e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="••••••••"
+                                className="mt-1 block w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary-500 text-slate-900 dark:text-white transition-all"
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition-all disabled:bg-slate-400 dark:disabled:bg-slate-800"
                         >
                             {loading ? 'Saving...' : 'Set Password & Login'}
                         </button>

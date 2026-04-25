@@ -58,28 +58,28 @@ export default function FileUploader({
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg border border-gray-100">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-        <Upload className="w-6 h-6 mr-2 text-indigo-600" />
+    <div className="max-w-xl mx-auto mt-10 p-6 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-100 dark:border-slate-800">
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center">
+        <Upload className="w-6 h-6 mr-2 text-primary-600" />
         {label}
       </h2>
 
       {/* Only show Bank Name input if we are uploading statements */}
       {endpoint.includes('statements') && (
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bank Name</label>
           <input
             type="text"
             value={bankName}
             onChange={(e) => setBankName(e.target.value)}
             placeholder="e.g. Chase"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-slate-900 dark:text-white"
           />
         </div>
       )}
 
       {/* File Drop Zone */}
-      <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors relative">
+      <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors relative">
         <input
           type="file"
           onChange={handleFileChange}
@@ -89,14 +89,14 @@ export default function FileUploader({
         <div className="flex flex-col items-center pointer-events-none">
           {file ? (
             <>
-              <FileText className="w-12 h-12 text-indigo-500 mb-2" />
-              <span className="text-sm font-medium text-gray-900">{file.name}</span>
+              <FileText className="w-12 h-12 text-primary-500 mb-2" />
+              <span className="text-sm font-medium text-slate-900 dark:text-white">{file.name}</span>
             </>
           ) : (
             <>
-              <Upload className="w-12 h-12 text-gray-400 mb-2" />
-              <span className="text-sm text-gray-500">Click to select file</span>
-              <span className="text-xs text-gray-400 mt-2">Supports CSV, Excel, PDF, and MT940 (SWIFT)</span>
+              <Upload className="w-12 h-12 text-slate-400 dark:text-slate-500 mb-2" />
+              <span className="text-sm text-slate-500 dark:text-slate-400">Click to select file</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500 mt-2">Supports CSV, Excel, PDF, and MT940 (SWIFT)</span>
             </>
           )}
         </div>
@@ -105,7 +105,9 @@ export default function FileUploader({
       <button
         onClick={handleUpload}
         disabled={status === 'uploading' || !file}
-        className={`w-full mt-6 py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all ${status === 'uploading' || !file ? 'bg-gray-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+        className={`w-full mt-6 py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all ${status === 'uploading' || !file 
+            ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed' 
+            : 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg shadow-primary-500/20'}`}
       >
         {status === 'uploading' ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Processing...</> : "Upload"}
       </button>
