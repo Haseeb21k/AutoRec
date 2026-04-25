@@ -161,6 +161,38 @@ def get_report_details(report_id: str, db: Session = Depends(get_db)):
         "matches": matches
     }
 
+@router.delete("/reports/{report_id}")
+def delete_report(
+    report_id: str, 
+    db: Session = Depends(get_db),
+    current_user: tables.User = Depends(deps.get_current_superuser)
+):
+    """
+    Deletes a saved report and all associated finalized records.
+    """
+    report = db.query(tables.ReconciliationReport).filter(tables.ReconciliationReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+        
+    try:
+        # 1. Delete associated matches
+        db.query(tables.ReconciliationMatch).filter(tables.ReconciliationMatch.report_id == report_id).delete()
+        
+        # 2. Delete associated transactions (they are finalized)
+        db.query(tables.Transaction).filter(tables.Transaction.report_id == report_id).delete()
+        
+        # 3. Delete associated ledger entries
+        db.query(tables.InternalLedger).filter(tables.InternalLedger.report_id == report_id).delete()
+        
+        # 4. Delete the report itself
+        db.delete(report)
+        
+        db.commit()
+        return {"status": "success", "message": "Report and associated data deleted"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 # --- NEW: RECENT ACTIVITY ENDPOINT ---
 @router.get("/activity")
 def get_recent_activity(limit: int = 10, db: Session = Depends(get_db)):

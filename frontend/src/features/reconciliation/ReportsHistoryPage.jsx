@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Database, Calendar, FileText, CheckCircle2, ChevronRight, ArrowLeft, Loader2, Search } from 'lucide-react';
+import { Database, Calendar, FileText, CheckCircle2, ChevronRight, ArrowLeft, Loader2, Search, Trash2, AlertTriangle } from 'lucide-react';
 import apiClient from '@/api/client';
 
 // Simple match table for the detail view
@@ -44,6 +44,11 @@ export default function ReportsHistoryPage() {
     const [selectedReport, setSelectedReport] = useState(null);
     const [reportDetails, setReportDetails] = useState(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
+    
+    // Delete state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [reportToDelete, setReportToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         fetchReports();
@@ -71,6 +76,27 @@ export default function ReportsHistoryPage() {
             console.error("Failed to fetch report details", err);
         } finally {
             setLoadingDetails(false);
+        }
+    };
+
+    const handleDeleteClick = (e, report) => {
+        e.stopPropagation(); // Don't trigger "view details"
+        setReportToDelete(report);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!reportToDelete) return;
+        setDeleting(true);
+        try {
+            await apiClient.delete(`/reconcile/reports/${reportToDelete.id}`);
+            setShowDeleteModal(false);
+            setReportToDelete(null);
+            fetchReports(); // Refresh list
+        } catch (err) {
+            alert("Failed to delete report.");
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -174,10 +200,18 @@ export default function ReportsHistoryPage() {
                                 <div className="p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
                                     <FileText className="w-5 h-5 text-indigo-600" />
                                 </div>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                                    <Calendar className="w-3 h-3 mr-1" />
-                                    {new Date(report.created_at).toLocaleDateString()}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
+                                        <Calendar className="w-3 h-3 mr-1" />
+                                        {new Date(report.created_at).toLocaleDateString()}
+                                    </span>
+                                    <button 
+                                        onClick={(e) => handleDeleteClick(e, report)}
+                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                             <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{report.name}</h3>
                             <div className="mt-4 flex items-center justify-between">
@@ -196,6 +230,41 @@ export default function ReportsHistoryPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="flex items-start mb-4">
+                            <div className="bg-red-100 p-3 rounded-full mr-4 text-red-600">
+                                <AlertTriangle className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Delete Report?</h3>
+                                <p className="text-gray-500 text-sm mt-1">
+                                    Are you sure you want to delete <span className="font-bold">"{reportToDelete?.name}"</span>? 
+                                    This will also permanently delete all associated match data for this audit.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                disabled={deleting}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center shadow-sm disabled:opacity-50 transition-colors"
+                            >
+                                {deleting ? 'Deleting...' : 'Yes, Delete'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
