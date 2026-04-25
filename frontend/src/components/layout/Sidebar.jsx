@@ -38,6 +38,11 @@ export default function Sidebar() {
                     Statements
                 </Link>
 
+                <Link to="/reports" className={navClass('/reports')}>
+                    <Database className="w-5 h-5 mr-3" />
+                    Saved Reports
+                </Link>
+
                 {/* CHECK ROLE HERE: Only show if superuser */}
                 {user?.role === 'superuser' && (
                     <Link to="/users" className={navClass('/users')}>

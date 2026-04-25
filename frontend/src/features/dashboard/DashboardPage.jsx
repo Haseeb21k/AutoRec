@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle2, DollarSign, Activity, Loader2, Play, Zap, Maximize2, X, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, CheckCircle2, DollarSign, Activity, Loader2, Play, Zap, Maximize2, X, Filter, Database, Save, Trash2 } from 'lucide-react';
 import apiClient from '@/api/client';
 import { useAuth } from '@/features/auth/AuthContext';
 
@@ -67,6 +68,7 @@ const FeedTable = ({ matches, limit }) => (
 
 export default function DashboardPage() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [running, setRunning] = useState(false);
     const [stats, setStats] = useState({
@@ -87,6 +89,44 @@ export default function DashboardPage() {
     // Custom Success Modal State
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [runResults, setRunResults] = useState(null);
+
+    // Save Report State
+    const [showSaveModal, setShowSaveModal] = useState(false);
+    const [reportName, setReportName] = useState('');
+    const [savingReport, setSavingReport] = useState(false);
+
+    // Clear State
+    const [showClearModal, setShowClearModal] = useState(false);
+    const [clearing, setClearing] = useState(false);
+
+    const handleClearData = async () => {
+        setClearing(true);
+        try {
+            await apiClient.delete('/reconcile/clear');
+            setShowClearModal(false);
+            loadData();
+        } catch (err) {
+            console.error("Clear failed", err);
+        } finally {
+            setClearing(false);
+        }
+    };
+
+    const handleSaveReport = async () => {
+        if (!reportName.trim()) return;
+        setSavingReport(true);
+        try {
+            await apiClient.post('/reconcile/save', { name: reportName });
+            setShowSaveModal(false);
+            setReportName('');
+            navigate('/reports');
+        } catch (err) {
+            console.error("Save failed", err);
+            alert("Failed to save report.");
+        } finally {
+            setSavingReport(false);
+        }
+    };
 
     const loadData = async () => {
         try {
@@ -109,10 +149,18 @@ export default function DashboardPage() {
 
     // --- WEBSOCKET CONNECTION ---
     useEffect(() => {
-        // Use production URL or localhost based on environment
-        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const host = window.location.host; // includes port if any
-        const wsUrl = `${protocol}//${host}/api/v1/reconcile/ws`;
+        // Use VITE_API_URL for production if provided, otherwise default to current host
+        const apiUrl = import.meta.env.VITE_API_URL || "";
+        let wsUrl;
+        
+        if (apiUrl) {
+            // Construct WS URL from the API URL (replace http with ws)
+            wsUrl = apiUrl.replace(/^http/, 'ws') + '/api/v1/reconcile/ws';
+        } else {
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            const host = window.location.host; 
+            wsUrl = `${protocol}//${host}/api/v1/reconcile/ws`;
+        }
         // Check if websockets available (simple check)
         let ws;
         try {
@@ -131,6 +179,12 @@ export default function DashboardPage() {
                         }
                         setRunning(false);
                         loadData(); // Refresh final stats
+                        return;
+                    }
+
+                    // Handle system clear event
+                    if (data.type === 'clear') {
+                        loadData(); // This will fetch empty stats/activity
                         return;
                     }
 
@@ -354,6 +408,86 @@ export default function DashboardPage() {
             )
             }
 
+            {/* Save Report Modal */}
+            {showSaveModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <div className="text-center mb-6">
+                            <div className="mx-auto bg-indigo-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 text-indigo-600">
+                                <Save className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900">Finalize Reconciliation</h3>
+                            <p className="text-gray-500 text-sm mt-1">
+                                Give this reconciliation run a name to save it to your history.
+                            </p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Report Name</label>
+                                <input 
+                                    autoFocus
+                                    type="text" 
+                                    value={reportName}
+                                    onChange={e => setReportName(e.target.value)}
+                                    placeholder="e.g., Monthly Close - April 2026"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-medium"
+                                />
+                            </div>
+                            
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowSaveModal(false)}
+                                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveReport}
+                                    disabled={savingReport || !reportName.trim()}
+                                    className="flex-[2] py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg disabled:opacity-50"
+                                >
+                                    {savingReport ? 'Saving...' : 'Confirm & Save'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Clear Data Confirmation Modal */}
+            {showClearModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in scale-in duration-200">
+                        <div className="text-center mb-6">
+                            <div className="mx-auto bg-red-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 text-red-600">
+                                <Trash2 className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900">Clear Active Data?</h3>
+                            <p className="text-gray-500 text-sm mt-1">
+                                This will remove all currently unmatched items and pending results.
+                                <span className="block mt-2 font-bold text-red-600">Saved reports will NOT be affected.</span>
+                            </p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowClearModal(false)}
+                                className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleClearData}
+                                disabled={clearing}
+                                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors shadow-lg disabled:opacity-50"
+                            >
+                                {clearing ? 'Clearing...' : 'Yes, Clear'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Executive Reconciliation Overview</h1>
@@ -361,23 +495,46 @@ export default function DashboardPage() {
                 </div>
 
                 {user?.role === 'superuser' && (
-                    <button
-                        onClick={handleRunReconciliation}
-                        disabled={running}
-                        className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all disabled:bg-indigo-400 disabled:shadow-none"
-                    >
-                        {running ? (
-                            <>
-                                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                Processing...
-                            </>
-                        ) : (
-                            <>
-                                <Play className="w-5 h-5 mr-2 fill-current" />
-                                Run Reconciliation Engine
-                            </>
+                    <div className="flex gap-3">
+                        {/* Save Button: only if there are active matches (no report_id) */}
+                        {recentMatches.length > 0 && recentMatches.some(m => !m.report_id) && !running && (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setShowClearModal(true)}
+                                    className="flex items-center px-4 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-medium hover:bg-red-100 transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Clear Active
+                                </button>
+                                
+                                <button
+                                    onClick={() => setShowSaveModal(true)}
+                                    className="flex items-center px-6 py-3 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-bold shadow-sm hover:bg-indigo-50 transition-all"
+                                >
+                                    <Database className="w-5 h-5 mr-2" />
+                                    Save as Report
+                                </button>
+                            </div>
                         )}
-                    </button>
+
+                        <button
+                            onClick={handleRunReconciliation}
+                            disabled={running}
+                            className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all disabled:bg-indigo-400 disabled:shadow-none"
+                        >
+                            {running ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                    Processing...
+                                </>
+                            ) : (
+                                <>
+                                    <Play className="w-5 h-5 mr-2 fill-current" />
+                                    Run Reconciliation Engine
+                                </>
+                            )}
+                        </button>
+                    </div>
                 )}
             </div>
 

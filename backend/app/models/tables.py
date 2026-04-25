@@ -20,6 +20,7 @@ class User(Base):
     
     # Relationships
     uploads = relationship("BankStatement", back_populates="uploader")
+    reports = relationship("ReconciliationReport", back_populates="user")
 
 # --- 2. BANK STATEMENTS (METADATA) ---
 class BankStatement(Base):
@@ -49,9 +50,11 @@ class Transaction(Base):
     raw_source = Column(String, nullable=True) 
     
     statement_id = Column(String, ForeignKey("bank_statements.id"))
+    report_id = Column(String, ForeignKey("reconciliation_reports.id"), nullable=True)
     
     statement = relationship("BankStatement", back_populates="transactions")
     reconciliation_match = relationship("ReconciliationMatch", back_populates="transaction", uselist=False)
+    report = relationship("ReconciliationReport", back_populates="transactions")
 
 # --- 4. INTERNAL LEDGER ---
 class InternalLedger(Base):
@@ -64,7 +67,10 @@ class InternalLedger(Base):
     description = Column(String, nullable=True)
     gl_code = Column(String, nullable=True)
     
+    report_id = Column(String, ForeignKey("reconciliation_reports.id"), nullable=True)
+    
     reconciliation_match = relationship("ReconciliationMatch", back_populates="ledger", uselist=False)
+    report = relationship("ReconciliationReport", back_populates="ledger_entries")
 
 # --- 5. RECONCILIATION MATCHES ---
 class ReconciliationMatch(Base):
@@ -72,8 +78,9 @@ class ReconciliationMatch(Base):
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     
-    transaction_id = Column(String, ForeignKey("transactions.id"), unique=True)
-    ledger_id = Column(String, ForeignKey("internal_ledger.id"), unique=True)
+    transaction_id = Column(String, ForeignKey("transactions.id"))
+    ledger_id = Column(String, ForeignKey("internal_ledger.id"), nullable=True)
+    report_id = Column(String, ForeignKey("reconciliation_reports.id"), nullable=True)
     
     match_type = Column(String)
     confidence_score = Column(Numeric(3, 2))
@@ -81,3 +88,23 @@ class ReconciliationMatch(Base):
     
     transaction = relationship("Transaction", back_populates="reconciliation_match")
     ledger = relationship("InternalLedger", back_populates="reconciliation_match")
+    report = relationship("ReconciliationReport", back_populates="matches")
+
+# --- 6. RECONCILIATION REPORTS (NEW) ---
+class ReconciliationReport(Base):
+    __tablename__ = "reconciliation_reports"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String, ForeignKey("users.id"))
+    
+    total_transactions = Column(Integer, default=0)
+    matched_count = Column(Integer, default=0)
+    total_amount = Column(Numeric(14, 2), default=0)
+    
+    # Relationships
+    user = relationship("User", back_populates="reports")
+    matches = relationship("ReconciliationMatch", back_populates="report")
+    ledger_entries = relationship("InternalLedger", back_populates="report")
+    transactions = relationship("Transaction", back_populates="report")

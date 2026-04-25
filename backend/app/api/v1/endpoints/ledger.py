@@ -50,4 +50,7 @@ async def upload_ledger(
 
 @router.get("/", response_model=List[schemas.LedgerOut])
 def get_ledger(db: Session = Depends(get_db)):
-    return db.query(tables.InternalLedger).all()
+    """
+    Returns only active (unsaved) ledger entries.
+    """
+    return db.query(tables.InternalLedger).filter(tables.InternalLedger.report_id == None).all()

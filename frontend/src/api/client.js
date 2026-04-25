@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-// Create a dedicated Axios instance
+// We use VITE_API_URL if set (for production), otherwise fallback to empty string (which uses the current domain/proxy)
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const apiClient = axios.create({
-  // We use /api because vite.config.js proxies this to http://127.0.0.1:8000
-  baseURL: '/api/v1',
+  baseURL: `${API_URL}/api/v1`,
   headers: {
     // Default headers if any
   },

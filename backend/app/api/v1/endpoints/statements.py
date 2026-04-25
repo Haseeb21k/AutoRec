@@ -16,9 +16,18 @@ router = APIRouter()
 @router.get("/", response_model=List[schemas.StatementOut])
 def read_statements(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
-    Retrieve all uploaded statements.
+    Retrieve all uploaded statements that have active (unsaved) transactions.
     """
-    statements = db.query(tables.BankStatement).offset(skip).limit(limit).all()
+    # 1. Fetch statements that have at least one transaction without a report_id
+    statements = db.query(tables.BankStatement).join(tables.Transaction).filter(
+        tables.Transaction.report_id == None
+    ).distinct().offset(skip).limit(limit).all()
+    
+    # 2. Filter the transactions within each statement to only show the active ones in the response
+    # Since we are using schemas, we can just filter the list in memory
+    for s in statements:
+        s.transactions = [t for t in s.transactions if t.report_id is None]
+        
     return statements
 
 @router.post("/upload", response_model=schemas.StatementOut)

@@ -44,3 +44,18 @@ class LedgerOut(LedgerBase):
     
     class Config:
         from_attributes = True
+
+# --- REPORT SCHEMAS ---
+class ReportCreate(BaseModel):
+    name: str
+
+class ReportOut(BaseModel):
+    id: str
+    name: str
+    created_at: datetime
+    total_transactions: int
+    matched_count: int
+    total_amount: Decimal
+
+    class Config:
+        from_attributes = True

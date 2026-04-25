@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -6,6 +7,7 @@ from app.api.v1.endpoints import deps
 # Import tables to access them for deletion
 from app.models import tables
 from app.core.websocket import manager
+from app.schemas import schemas
 
 router = APIRouter()
 
@@ -54,17 +56,110 @@ def get_stats(db: Session = Depends(get_db)):
     }
 
 @router.delete("/clear")
-def clear_data(db: Session = Depends(get_db)):
+async def clear_data(db: Session = Depends(get_db)):
+    """
+    Clears only UNRECONCILED data (data not part of a saved report).
+    """
     try:
-        db.query(tables.ReconciliationMatch).delete()
-        db.query(tables.Transaction).delete()
-        db.query(tables.InternalLedger).delete()
-        db.query(tables.BankStatement).delete()
+        # 1. Matches with no report_id
+        db.query(tables.ReconciliationMatch).filter(tables.ReconciliationMatch.report_id == None).delete()
+        
+        # 2. Transactions with no report_id
+        db.query(tables.Transaction).filter(tables.Transaction.report_id == None).delete()
+        
+        # 3. Ledger with no report_id
+        db.query(tables.InternalLedger).filter(tables.InternalLedger.report_id == None).delete()
+        
         db.commit()
-        return {"status": "success", "message": "All data cleared"}
+
+        # Broadcast clear event to all connected clients (Dashboard)
+        await manager.broadcast({"type": "clear"})
+
+        return {"status": "success", "message": "Unreconciled data cleared"}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+# --- NEW: SAVE & HISTORY ENDPOINTS ---
+
+@router.post("/save", response_model=schemas.ReportOut)
+def save_reconciliation(
+    report_in: schemas.ReportCreate,
+    db: Session = Depends(get_db),
+    current_user: tables.User = Depends(deps.get_current_superuser)
+):
+    """
+    Finalizes the current matches into a saved report.
+    """
+    # 1. Get current matches (where report_id is NULL)
+    active_matches = db.query(tables.ReconciliationMatch).filter(
+        tables.ReconciliationMatch.report_id == None
+    ).all()
+    
+    if not active_matches:
+        raise HTTPException(status_code=400, detail="No active matches to save")
+        
+    # 2. Calculate summary stats
+    total_tx = len(active_matches)
+    matched_count = len([m for m in active_matches if m.match_type != 'mismatch'])
+    total_amount = sum([m.transaction.amount for m in active_matches])
+    
+    # 3. Create Report
+    report = tables.ReconciliationReport(
+        name=report_in.name,
+        created_by=current_user.id,
+        total_transactions=total_tx,
+        matched_count=matched_count,
+        total_amount=total_amount
+    )
+    db.add(report)
+    db.flush() # Get report.id
+    
+    # 4. Link matches, transactions, and ledgers to the report
+    for match in active_matches:
+        match.report_id = report.id
+        if match.transaction:
+            match.transaction.report_id = report.id
+        if match.ledger:
+            match.ledger.report_id = report.id
+            
+    db.commit()
+    db.refresh(report)
+    return report
+
+@router.get("/reports", response_model=List[schemas.ReportOut])
+def list_reports(db: Session = Depends(get_db)):
+    return db.query(tables.ReconciliationReport).order_by(tables.ReconciliationReport.created_at.desc()).all()
+
+@router.get("/reports/{report_id}")
+def get_report_details(report_id: str, db: Session = Depends(get_db)):
+    report = db.query(tables.ReconciliationReport).filter(tables.ReconciliationReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+        
+    # Return report metadata + matches
+    matches = []
+    for m in report.matches:
+        matches.append({
+            "id": m.id,
+            "match_type": m.match_type,
+            "amount": m.transaction.amount,
+            "date": m.transaction.date,
+            "bank_desc": m.transaction.description,
+            "ledger_desc": m.ledger.description if m.ledger else "-",
+            "confidence": m.confidence_score
+        })
+        
+    return {
+        "metadata": {
+            "id": report.id,
+            "name": report.name,
+            "created_at": report.created_at,
+            "total_transactions": report.total_transactions,
+            "matched_count": report.matched_count
+        },
+        "matches": matches
+    }
 
 # --- NEW: RECENT ACTIVITY ENDPOINT ---
 @router.get("/activity")
@@ -94,6 +189,7 @@ def get_recent_activity(limit: int = 10, db: Session = Depends(get_db)):
             "date": m.transaction.date,
             "bank_desc": m.transaction.description,
             "ledger_desc": m.ledger.description if m.ledger else "-",
-            "confidence": m.confidence_score
+            "confidence": m.confidence_score,
+            "report_id": m.report_id
         })
     return activity

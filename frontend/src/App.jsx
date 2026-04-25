@@ -4,6 +4,7 @@ import LoginPage from '@/features/auth/LoginPage';
 import SetPasswordPage from '@/features/auth/SetPasswordPage';
 import Sidebar from '@/components/layout/Sidebar';
 import ReconciliationPage from '@/features/reconciliation/ReconciliationPage';
+import ReportsHistoryPage from '@/features/reconciliation/ReportsHistoryPage';
 import DashboardPage from '@/features/dashboard/DashboardPage';
 import UserManagementPage from '@/features/users/UserManagementPage';
 
@@ -46,6 +47,12 @@ export default function App() {
           <Route path="/reconcile" element={
             <PrivateRoute>
               <ReconciliationPage />
+            </PrivateRoute>
+          } />
+
+          <Route path="/reports" element={
+            <PrivateRoute>
+              <ReportsHistoryPage />
             </PrivateRoute>
           } />
 
