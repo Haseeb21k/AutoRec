@@ -72,3 +72,7 @@ pdfstatement.py
 excelgen.py
 frontend/nginx.conf
 test_data/
+credentials.json
+token.json
+test_email.py
+generate_gmail_token.py
